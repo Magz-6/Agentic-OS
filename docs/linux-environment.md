@@ -142,15 +142,52 @@ To maintain technical honesty and prevent overclaiming, the following table expl
 | **Ubuntu 24.04 (WSL2) User-Space** | **VERIFIED** | 75/75 unit tests passing; all 6 live smoke checks verified against live kernel. |
 | **Windows 11 Host Execution** | **VERIFIED** | 73 passed, 2 intentional skips; cross-platform standard library compatibility proven. |
 | **systemd User Session Interaction** | **VERIFIED** | Read-only inspection of active/failed/inactive services via `systemctl --user`. |
+| **Standalone Bootable ISO (QEMU)** | **BOOT VALIDATED** | ISO boot validated under QEMU; reproducible build codification in progress. Boots to `systemd 255.4`. |
 | **Bare-Metal Linux Hardware Boot** | **NOT TESTED** | Prototype has not yet been booted directly on physical PC hardware without virtualization. |
-| **Standalone Bootable ISO** | **NOT TESTED** | `AgenticOS-v0.1-Alpha.iso` has not been generated or booted; build path remains `UNDEFINED / BLOCKED`. |
 | **Full Desktop Shell (GNOME/KDE)** | **NOT TESTED** | WSLg display tested; full standalone desktop manager has not been integrated. |
-| **System-Wide Service Installation** | **NOT TESTED** | Template created; unit has not been installed into `/etc/systemd/system` or started. |
+| **System-Wide Service Installation** | **NOT YET IMPLEMENTED** | Template created; unit not installed in `/etc/systemd/system` (`INSTALL_SYSTEMD_SERVICE=0`). |
+
+### QEMU Boot Validation & Casper Live Environment
+
+During Phase 20, the hybrid live ISO (`AgenticOS-v0.1-Alpha.iso`) was assembled using Candidate B (Ubuntu 24.04.5 Live Server base) and empirically validated under QEMU 8.2.2 across both BIOS and UEFI boot paths.
+
+* **Verified Upstream Components:**
+  * Ubuntu 24.04.5 Live Server release media
+  * Linux kernel `6.8.0-139-generic` (`vmlinuz`)
+  * Casper-enabled `initrd`
+  * Base rootfs `ubuntu-server-minimal.squashfs`
+* **Empirically Codified Casper Requirements:**
+  * `/.disk/casper-uuid-generic` matching initrd `/conf/uuid.conf` (`50c98eb4-4c0f-4c1a-82d2-4234cf187d50`)
+  * `/.disk/info` (`AgenticOS v0.1 Alpha`)
+  * Kernel cmdline parameter: `layerfs-path=ubuntu-server-minimal.squashfs`
+* **Verified Runtime Chain:**
+  ```text
+  Linux kernel
+      ↓
+  initrd
+      ↓
+  Casper
+      ↓
+  live optical medium
+      ↓
+  SquashFS
+      ↓
+  OverlayFS
+      ↓
+  systemd
+      ↓
+  Ubuntu 24.04.5 userspace
+  ```
+* **Historical Step 20.10 Test Artifact Checksum:**
+  `54790d1f5ccff2736fa16a1b7b1cf4035580fe23e97a7028ca0d22232c07e77e` (size: 246,796,288 bytes).
+* **Strict Boundary Declaration:**
+  The QEMU result establishes virtualized boot validation, **not universal hardware compatibility**. We do **NOT** claim production-ready, installation-ready, hardware compatibility validated, physical-machine boot validated, or universal UEFI/BIOS compatibility.
 
 ---
 
 ## 9. Environment Limitations Impacting the Prototype
 
-1. **Absence of Bare-Metal Hardware Telemetry:** Temperature sensors (`/sys/class/thermal`) and battery metrics (`/sys/class/power_supply`) are not surfaced by Hyper-V in WSL2.
-2. **Read-Only Inspection Focus:** Current adapters strictly observe the system; autonomous mutation or remedial action requires higher-layer team approval.
-3. **Absence of Official Team APIs:** All inter-component communication currently uses temporary local Python dataclasses pending project-wide API freeze.
+1. **Virtual Machine Scope:** Telemetry and boot have been validated in virtualized environments (WSL2 Hyper-V and QEMU); physical bare-metal hardware validation is pending.
+2. **Absence of Bare-Metal Hardware Telemetry:** Temperature sensors (`/sys/class/thermal`) and battery metrics (`/sys/class/power_supply`) are not surfaced by Hyper-V in WSL2.
+3. **Read-Only Inspection Focus:** Current adapters strictly observe the system; autonomous mutation or remedial action requires higher-layer team approval.
+4. **Absence of Official Team APIs:** All inter-component communication currently uses temporary local Python dataclasses pending project-wide API freeze.

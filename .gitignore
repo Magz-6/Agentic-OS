@@ -36,3 +36,9 @@ WhatsApp Image*
 # Local scratch directory & temporary files
 scratch/
 *.tmp
+
+# Packaging build staging and intermediate artifacts
+packaging/staging/*
+!packaging/staging/.gitkeep
+packaging/output/*
+!packaging/output/.gitkeep

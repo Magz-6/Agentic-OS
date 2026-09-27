@@ -1,0 +1,27 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AgenticOS
+Comment=AgenticOS Operating System Interface & Diagnostics
+Exec=/usr/bin/python3 -m linux_integration.health
+Icon=utilities-system-monitor
+Terminal=true
+Categories=System;Utility;
+Keywords=AgenticOS;System;Telemetry;Diagnostics;
+Actions=SystemInfo;HealthCheck;LaunchTerminal;LaunchBrowser;
+
+[Desktop Action SystemInfo]
+Name=Show System Information
+Exec=/usr/bin/python3 -m hardware.detector
+
+[Desktop Action HealthCheck]
+Name=Check Service Health
+Exec=/usr/bin/python3 -m linux_integration.health
+
+[Desktop Action LaunchTerminal]
+Name=Open Approved Terminal
+Exec=/usr/bin/python3 -c "from adapters.app_launcher import AppLauncher; AppLauncher().launch('terminal')"
+
+[Desktop Action LaunchBrowser]
+Name=Open Approved Browser
+Exec=/usr/bin/python3 -c "from adapters.app_launcher import AppLauncher; AppLauncher().launch('browser')"

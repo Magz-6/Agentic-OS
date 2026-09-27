@@ -1,0 +1,38 @@
+# Byte-compiled / optimized Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Test, coverage, and runtime caches
+.pytest_cache/
+.coverage
+htmlcov/
+.cache/
+
+# Operating system metadata
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor & IDE workspace settings
+.vscode/
+.idea/
+*.swp
+*~
+
+# Microsoft Office temporary lock files
+~$*
+
+# Targeted temporary reference media (preserves other project images)
+WhatsApp Image*
+
+# Virtual machine disk images & ISO build artifacts
+*.iso
+*.qcow2
+*.img
+*.vmdk
+*.vhdx
+
+# Local scratch directory & temporary files
+scratch/
+*.tmp

@@ -1,0 +1,25 @@
+# AgenticOS Telemetry Collector - User Service Template
+# Layer 12: Agentic Microkernel / Linux Integration Boundary
+# Owner: Magesh (Linux/OS Lead)
+# STATUS: TEMPLATE ONLY — NOT INSTALLED / NOT ENABLED
+
+[Unit]
+Description=AgenticOS System Telemetry Collector (User Service Template)
+# Documentation: UNDEFINED / REQUIRES TEAM REPOSITORY APPROVAL
+After=default.target
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=%h/AgenticOS
+ExecStart=/usr/bin/python3 -m telemetry.collector
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Security: Zero elevated privileges
+NoNewPrivileges=true
+
+[Install]
+WantedBy=default.target

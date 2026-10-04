@@ -6,8 +6,7 @@
 [Unit]
 Description=AgenticOS Graphical Desktop Session
 Documentation=https://github.com/agenticos/agenticos
-After=systemd-user-sessions.service agenticos-firstboot.service agenticos-prompt-ui.service
-Wants=agenticos-prompt-ui.service
+After=systemd-user-sessions.service agenticos-firstboot.service
 Conflicts=getty@tty7.service
 
 [Service]

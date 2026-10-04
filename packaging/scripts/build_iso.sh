@@ -436,7 +436,7 @@ if [[ "${INSTALL_SYSTEMD_SERVICE}" -eq 1 ]] && \
     if [[ -f "${SYSTEMD_TEMPLATE_DIR}/agenticos-goal-runtime.service.template" ]]; then
 
         cp \
-            "${SYSTEMD_TEMPLATE_DIR}/agenticos-goal-runtime.service.template \
+        "${SYSTEMD_TEMPLATE_DIR}/agenticos-goal-runtime.service.template" \
             "${SQUASHFS_ROOT_DIR}/etc/systemd/system/agenticos-goal-runtime.service"
 
         mkdir -p \

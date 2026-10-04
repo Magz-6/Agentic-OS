@@ -109,6 +109,12 @@ class ApplicationAdapter(BaseAdapter):
 
         return True, None
 
+    def is_retry_safe(
+        self, action: str, parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Only non-launch application queries are safe to repeat."""
+        return action in self.SUPPORTED_ACTIONS and action != "launch_application"
+
     def execute(self, action: str, parameters: Dict[str, Any]) -> AdapterResult:
         """Execute validated application action and return structured AdapterResult."""
         if action in ("list_applications", "list_allowed_applications"):

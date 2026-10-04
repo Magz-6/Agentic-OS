@@ -48,7 +48,7 @@ class TestDesktopServiceTemplate(unittest.TestCase):
         unit = config["Unit"]
         after = unit.get("After", "")
         self.assertIn("agenticos-firstboot.service", after)
-        self.assertIn("agenticos-prompt-ui.service", after)
+        self.assertNotIn("agenticos-prompt-ui.service", after)
 
     def test_service_execstart(self):
         config = configparser.ConfigParser(interpolation=None)

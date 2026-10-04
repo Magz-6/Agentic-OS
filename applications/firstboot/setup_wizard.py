@@ -112,31 +112,13 @@ def is_setup_completed(
     marker_path: str = DEFAULT_MARKER_PATH, passwd_path: str = DEFAULT_PASSWD_PATH
 ) -> bool:
     """
-    Detect whether first-boot account setup has already been completed.
-    Returns True if marker file exists or if an interactive non-root user (UID >= 1000) exists.
+    Detect whether AgenticOS first-boot account setup has completed.
+
+    Completion is determined exclusively by the AgenticOS completion marker.
+    A pre-existing user in the Ubuntu base image must NOT suppress the
+    AgenticOS first-boot wizard.
     """
-    if os.path.exists(marker_path):
-        return True
-
-    # Check if a non-root regular user (UID in range 1000-59999) already exists
-    if os.path.exists(passwd_path):
-        try:
-            with open(passwd_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    parts = line.strip().split(":")
-                    if len(parts) >= 3:
-                        try:
-                            uid = int(parts[2])
-                            # Standard Linux non-root regular users start at UID 1000
-                            # Exclude nobody (usually 65534)
-                            if 1000 <= uid < 65534:
-                                return True
-                        except ValueError:
-                            continue
-        except Exception:
-            pass
-
-    return False
+    return os.path.exists(marker_path)
 
 
 def check_setup(

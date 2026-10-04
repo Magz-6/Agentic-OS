@@ -192,7 +192,8 @@ def allow_x_access(username: str, env: dict[str, str]) -> None:
 
 def launch_session(username: str, url: str = PROMPT_UI_URL, display: str = DISPLAY_NUM) -> tuple[subprocess.Popen, subprocess.Popen]:
     """
-    Launch Openbox window manager and Falkon web browser as the unprivileged user.
+    Launch Openbox window manager and the native AgenticOS GTK shell
+    as the unprivileged user.
     """
     env, uid, gid = get_user_env(username, display)
     allow_x_access(username, env)
@@ -213,11 +214,11 @@ def launch_session(username: str, url: str = PROMPT_UI_URL, display: str = DISPL
     # Give Openbox a moment to map the root window
     time.sleep(1.0)
 
-    # 2. Start Falkon browser pointing to Prompt UI as unprivileged user
-    falkon_bin = "/usr/bin/falkon"
-    print(f"[Desktop] Starting Falkon ({url}) as '{username}' (UID {uid})...", flush=True)
-    falkon_proc = subprocess.Popen(
-        [falkon_bin, url],
+    # 2. Start native AgenticOS GTK shell as unprivileged user
+    shell_bin = "/opt/agenticos/applications/agenticos-shell/main.py"
+    print(f"[Desktop] Starting AgenticOS native shell as '{username}'...", flush=True)
+    shell_proc = subprocess.Popen(
+        ["/usr/bin/python3", shell_bin],
         user=uid,
         group=gid,
         env=env,
@@ -226,69 +227,7 @@ def launch_session(username: str, url: str = PROMPT_UI_URL, display: str = DISPL
         stderr=subprocess.DEVNULL,
     )
 
-    return openbox_proc, falkon_proc
-
-
-def main() -> int:
-    release_plymouth()
-
-    try:
-        username = wait_for_user(timeout_seconds=300.0)
-    except Exception as e:
-        print(f"[Desktop] Error: {e}", file=sys.stderr)
-        return 1
-
-    x_proc = start_x_server()
-
-    if not wait_for_x_server():
-        print("[Desktop] Error: X server failed to initialize.", file=sys.stderr)
-        try:
-            x_proc.terminate()
-        except Exception:
-            pass
-        return 1
-
-    switch_vt(VT_NUM)
-
-    openbox_proc, falkon_proc = launch_session(username)
-
-    stop_requested = False
-
-    def handle_signal(sig, frame):
-        nonlocal stop_requested
-        stop_requested = True
-        print(f"[Desktop] Received signal {sig}, shutting down session...", flush=True)
-        for proc in [falkon_proc, openbox_proc, x_proc]:
-            try:
-                proc.terminate()
-            except Exception:
-                pass
-
-    signal.signal(signal.SIGTERM, handle_signal)
-    signal.signal(signal.SIGINT, handle_signal)
-
-    while not stop_requested:
-        if x_proc.poll() is not None:
-            print("[Desktop] X server exited.", flush=True)
-            break
-
-        if openbox_proc.poll() is not None:
-            print("[Desktop] Openbox session exited.", flush=True)
-            break
-
-        time.sleep(1.0)
-
-    for proc in [falkon_proc, openbox_proc, x_proc]:
-        try:
-            proc.terminate()
-            proc.wait(timeout=2.0)
-        except Exception:
-            try:
-                proc.kill()
-            except Exception:
-                pass
-
-    return 0
+    return openbox_proc, shell_proc
 
 
 if __name__ == "__main__":

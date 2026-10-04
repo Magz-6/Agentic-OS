@@ -79,6 +79,12 @@ class SystemAdapter(BaseAdapter):
 
         return True, None
 
+    def is_retry_safe(
+        self, action: str, parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """SystemAdapter operations are read-only and safe to repeat."""
+        return action in self.SUPPORTED_ACTIONS
+
     def execute(self, action: str, parameters: Dict[str, Any]) -> AdapterResult:
         """Execute validated non-destructive system query."""
         if action == "get_hostname":

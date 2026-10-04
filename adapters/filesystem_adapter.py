@@ -290,6 +290,12 @@ class FilesystemAdapter(BaseAdapter):
 
         return True, None
 
+    def is_retry_safe(
+        self, action: str, parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """FilesystemAdapter operations are read-only and safe to repeat."""
+        return action in self.SUPPORTED_ACTIONS
+
     def execute(self, action: str, parameters: Dict[str, Any]) -> AdapterResult:
         """Execute validated filesystem action and return AdapterResult."""
         if action in ("inspect_path", "get_metadata"):

@@ -62,6 +62,17 @@ class BaseAdapter(ABC):
         """
         pass
 
+    def is_retry_safe(
+        self, action: str, parameters: Optional[Dict[str, Any]] = None
+    ) -> bool:
+        """Return whether an interrupted action may be safely executed again.
+
+        Adapters must explicitly opt in to retry safety. The conservative
+        default is False so side-effecting operations are never repeated
+        automatically after a crash.
+        """
+        return False
+
     def run(
         self, action: str, parameters: Optional[Dict[str, Any]] = None
     ) -> AdapterResult:

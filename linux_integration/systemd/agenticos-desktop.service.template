@@ -1,0 +1,24 @@
+# AgenticOS Desktop Session - System Service Template
+# Layer 12: Linux Integration Boundary & Layer 9: Applications / Desktop
+# Owner: Magesh (Linux/OS Lead)
+# STATUS: TEMPLATE ONLY — PACKAGED INTO SQUASHFS ROOTFS DURING ISO BUILD
+
+[Unit]
+Description=AgenticOS Graphical Desktop Session
+Documentation=https://github.com/agenticos/agenticos
+After=systemd-user-sessions.service agenticos-firstboot.service agenticos-prompt-ui.service
+Wants=agenticos-prompt-ui.service
+Conflicts=getty@tty7.service
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/agenticos/system-services/desktop/runner.py
+Restart=always
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical.target
+Alias=display-manager.service

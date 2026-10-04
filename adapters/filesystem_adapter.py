@@ -15,16 +15,38 @@ permission changes, or mount capabilities. It cannot execute files.
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
+from .base import BaseAdapter
+from .result import AdapterResult, AdapterStatus
 
 
-class FilesystemAdapter:
+class FilesystemAdapter(BaseAdapter):
     """
     Read-only adapter for inspecting Linux files, directories, and mounts.
+    Implements BaseAdapter framework contract while preserving direct method interfaces.
     """
 
-    def __init__(self, mounts_path: str = "/proc/mounts") -> None:
+    SUPPORTED_ACTIONS: Set[str] = {
+        "inspect_path",
+        "check_existence",
+        "list_directory",
+        "get_metadata",
+        "get_usage",
+        "get_mounts",
+    }
+
+    def __init__(self, mounts_path: str = "/proc/mounts", allowed_roots: Optional[List[str]] = None) -> None:
         self.mounts_path = Path(mounts_path)
+        self.allowed_roots = [Path(r).resolve() for r in allowed_roots] if allowed_roots else None
+
+    @property
+    def name(self) -> str:
+        return "filesystem"
+
+    @property
+    def supported_actions(self) -> Set[str]:
+        return set(self.SUPPORTED_ACTIONS)
 
     def inspect_path(self, target_path: Union[str, Path]) -> Dict[str, Any]:
         """
@@ -225,6 +247,115 @@ class FilesystemAdapter:
 
         return mounts
 
+    def _resolve_target_path(self, parameters: Dict[str, Any], default: Optional[str] = None) -> Optional[str]:
+        """Helper to extract 'path' or 'target_path' from parameters."""
+        return parameters.get("path", parameters.get("target_path", default))
+
+    def validate(self, action: str, parameters: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+        """Validate filesystem action and parameters against safety boundaries."""
+        if action not in self.SUPPORTED_ACTIONS:
+            return False, f"Action '{action}' is not supported by {self.name}"
+
+        # Safe parameter type checking
+        if not isinstance(parameters, dict):
+            return False, "Parameters must be a dictionary"
+
+        # Actions requiring a target path
+        if action in ("inspect_path", "check_existence", "get_metadata", "list_directory"):
+            target = self._resolve_target_path(parameters)
+            if target is None:
+                return False, f"Missing required parameter 'path' or 'target_path' for action '{action}'"
+            if not isinstance(target, (str, Path)) or str(target).strip() == "":
+                return False, "Parameter 'path' must be a non-empty string"
+            if "\0" in str(target):
+                return False, "Parameter 'path' contains illegal null byte"
+
+            # Check sandbox traversal if allowed_roots is enforced
+            if self.allowed_roots:
+                resolved = Path(target).resolve()
+                if not any(resolved == root or root in resolved.parents for root in self.allowed_roots):
+                    return False, f"Path traversal violation: '{target}' resolves outside allowed workspace"
+
+            if action == "list_directory" and "limit" in parameters:
+                limit = parameters["limit"]
+                if not isinstance(limit, int) or isinstance(limit, bool) or limit < 0:
+                    return False, "Parameter 'limit' must be a non-negative integer"
+
+        elif action == "get_usage":
+            target = self._resolve_target_path(parameters, default="/")
+            if not isinstance(target, (str, Path)):
+                return False, "Parameter 'path' must be a string or Path"
+            if "\0" in str(target):
+                return False, "Parameter 'path' contains illegal null byte"
+
+        return True, None
+
+    def execute(self, action: str, parameters: Dict[str, Any]) -> AdapterResult:
+        """Execute validated filesystem action and return AdapterResult."""
+        if action in ("inspect_path", "get_metadata"):
+            target = self._resolve_target_path(parameters)
+            info = self.inspect_path(target)  # type: ignore
+            return AdapterResult.success_result(
+                adapter=self.name,
+                action=action,
+                message=f"Path inspection status: {info['status']}",
+                data=info,
+            )
+
+        elif action == "check_existence":
+            target = self._resolve_target_path(parameters)
+            info = self.inspect_path(target)  # type: ignore
+            return AdapterResult.success_result(
+                adapter=self.name,
+                action=action,
+                message=f"Path exists: {info['exists']}",
+                data={"path": info["path"], "exists": info["exists"], "status": info["status"]},
+            )
+
+        elif action == "list_directory":
+            target = self._resolve_target_path(parameters)
+            limit = parameters.get("limit", 100)
+            listing = self.list_directory(target, limit=limit)  # type: ignore
+            if listing.get("status") == "ok":
+                return AdapterResult.success_result(
+                    adapter=self.name,
+                    action=action,
+                    message=f"Directory listed successfully ({listing['total_entries']} entries found)",
+                    data=listing,
+                )
+            else:
+                return AdapterResult.execution_error(
+                    adapter=self.name,
+                    action=action,
+                    message=f"Failed to list directory: {listing['status']}",
+                    details=listing,
+                )
+
+        elif action == "get_usage":
+            target = self._resolve_target_path(parameters, default="/")
+            usage = self.get_usage(target)  # type: ignore
+            return AdapterResult.success_result(
+                adapter=self.name,
+                action=action,
+                message=f"Filesystem capacity queried for {usage['path']}",
+                data=usage,
+            )
+
+        elif action == "get_mounts":
+            mounts = self.get_mounts()
+            return AdapterResult.success_result(
+                adapter=self.name,
+                action=action,
+                message=f"Retrieved {len(mounts)} mount points",
+                data={"mounts": mounts, "count": len(mounts)},
+            )
+
+        return AdapterResult.unsupported_action(
+            adapter=self.name,
+            action=action,
+            supported_actions=self.supported_actions,
+        )
+
 
 if __name__ == "__main__":
     import json
@@ -233,3 +364,6 @@ if __name__ == "__main__":
     print(json.dumps(adapter.get_usage("/"), indent=2))
     print("\nRoot directory listing sample:")
     print(json.dumps(adapter.list_directory("/", limit=5), indent=2))
+    print("\nAdapter execution via run():")
+    res = adapter.run("inspect_path", {"path": "/etc"})
+    print(json.dumps(res.to_dict(), indent=2))

@@ -1,0 +1,34 @@
+# AgenticOS Goal Runtime - System Service Template
+# Layer 12: Linux Integration Boundary & Layer 3: Goal Runtime
+# Owner: Magesh (Linux Integration & System Services Lead)
+# Component: Vivek's Goal Runtime
+# STATUS: TEMPLATE ONLY — PACKAGED INTO SQUASHFS ROOTFS DURING ISO BUILD
+
+[Unit]
+Description=AgenticOS Goal Runtime Service
+Documentation=https://github.com/agenticos/agenticos
+After=network.target
+
+[Service]
+Type=simple
+Environment="PYTHONUNBUFFERED=1" "PYTHONPATH=/opt/agenticos"
+WorkingDirectory=/opt/agenticos
+ExecStart=/usr/bin/python3 /opt/agenticos/system-services/goal-runtime/runner.py
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# Security: Unprivileged execution via DynamicUser
+DynamicUser=yes
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+# State Directory: Prepares OS-level persistence boundary (/var/lib/agenticos/goal-runtime)
+# Note: Goal data persistence remains in-memory pending Vivek's team approval
+StateDirectory=agenticos/goal-runtime
+
+[Install]
+WantedBy=multi-user.target

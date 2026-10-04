@@ -12,7 +12,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from adapters.filesystem_adapter import FilesystemAdapter
+import adapters.filesystem_adapter
 
 
 class TestFilesystemAdapter(unittest.TestCase):
@@ -22,7 +22,7 @@ class TestFilesystemAdapter(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.root = Path(self.temp_dir.name)
         self.mounts_mock = self.root / "mock_mounts"
-        self.adapter = FilesystemAdapter(mounts_path=str(self.mounts_mock))
+        self.adapter = adapters.filesystem_adapter.FilesystemAdapter(mounts_path=str(self.mounts_mock))
 
     def tearDown(self) -> None:
         self.temp_dir.cleanup()
@@ -186,7 +186,7 @@ proc /proc proc rw,nosuid,nodev,noexec,relatime 0 0
             "format",
             "mkfs",
             "dd",
-            "execute",
+            "execute_file",
         ]
         for method in forbidden_methods:
             self.assertFalse(

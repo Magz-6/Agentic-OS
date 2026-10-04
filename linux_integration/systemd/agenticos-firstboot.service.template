@@ -1,0 +1,26 @@
+# AgenticOS First-Boot Account Setup Wizard - System Service Template
+# Layer 12: Agentic Microkernel / Linux Integration Boundary
+# Owner: Magesh (Linux/OS Lead)
+# STATUS: TEMPLATE ONLY — PACKAGED INTO SQUASHFS ROOTFS DURING ISO BUILD
+
+[Unit]
+Description=AgenticOS First-Boot Account Setup Wizard
+Documentation=https://github.com/agenticos/agenticos
+After=systemd-user-sessions.service
+Before=getty@tty1.service
+ConditionPathExists=!/var/lib/agenticos/firstboot-completed
+
+[Service]
+Type=oneshot
+StandardInput=tty
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/tty1
+TTYReset=yes
+TTYVHangup=yes
+ExecStartPre=-/usr/bin/plymouth quit
+ExecStart=/usr/bin/python3 /opt/agenticos/applications/firstboot/setup_wizard.py
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

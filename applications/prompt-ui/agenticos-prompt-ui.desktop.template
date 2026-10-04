@@ -1,0 +1,23 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=AgenticOS Prompt UI
+Comment=AgenticOS Prototype Natural Language Prompt Interface (Mock Engine)
+Exec=/usr/bin/python3 applications/prompt-ui/launch.py
+Icon=utilities-terminal
+Terminal=false
+Categories=Utility;Development;
+Keywords=AgenticOS;Prompt;UI;AI;Agent;Prototype;
+Actions=LaunchBrowserOnly;StartServerOnly;StopServer;
+
+[Desktop Action LaunchBrowserOnly]
+Name=Open UI in Browser
+Exec=/usr/bin/python3 -m webbrowser http://localhost:8000
+
+[Desktop Action StartServerOnly]
+Name=Start Background Server
+Exec=/usr/bin/python3 applications/prompt-ui/server.py
+
+[Desktop Action StopServer]
+Name=Stop Background Server
+Exec=/usr/bin/python3 applications/prompt-ui/launch.py --stop

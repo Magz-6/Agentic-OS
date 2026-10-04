@@ -1,0 +1,26 @@
+# AgenticOS Prompt UI Web Server
+# Owner: Magesh
+# Packaged into the ISO root filesystem during build
+
+[Unit]
+Description=AgenticOS Prompt UI Web Server
+After=network.target
+
+[Service]
+Type=simple
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/opt/agenticos/applications/prompt-ui
+ExecStart=/usr/bin/python3 /opt/agenticos/applications/prompt-ui/server.py
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+DynamicUser=yes
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

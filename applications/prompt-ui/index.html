@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AGENTICOS v0.1 ALPHA - Prompt Interface</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="agenticos-theme">
+  <!-- Subtle ambient background glow -->
+  <div class="ambient-glow glow-cyan"></div>
+  <div class="ambient-glow glow-indigo"></div>
+
+  <!-- Primary Application Container -->
+  <div class="app-layout">
+    
+    <!-- Top System Bar -->
+    <header class="system-header">
+      <div class="brand-group">
+        <div class="brand-badge">
+          <span class="pulse-dot"></span>
+          <span class="badge-text">SYS_ALPHA</span>
+        </div>
+        <div class="brand-titles">
+          <h1 class="main-title">AGENTICOS <span class="version-tag">v0.1 ALPHA</span></h1>
+          <p class="sub-title">Next-Gen Autonomous Agent Orchestration Shell</p>
+        </div>
+      </div>
+
+      <div class="telemetry-bar">
+        <div class="telemetry-item" title="Kernel Runtime State">
+          <span class="telemetry-label">KERNEL:</span>
+          <span class="telemetry-val text-emerald">READY</span>
+        </div>
+        <div class="telemetry-item" title="Backend Interface Mode">
+          <span class="telemetry-label">MODE:</span>
+          <span class="telemetry-val text-cyan">MOCK SANDBOX</span>
+        </div>
+        <div class="telemetry-item" title="Security Subsystem">
+          <span class="telemetry-label">POLICY:</span>
+          <span class="telemetry-val text-amber">STRICT ENFORCEMENT</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <main class="main-content">
+      
+      <!-- Prompt Control Section -->
+      <section class="prompt-section card">
+        <div class="section-header">
+          <span class="section-indicator">01 //</span>
+          <h2 class="section-title">COMMAND PROMPT</h2>
+          <span class="hotkey-tip">Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to execute</span>
+        </div>
+
+        <div class="prompt-input-wrapper">
+          <textarea 
+            id="promptInput" 
+            class="prompt-textarea" 
+            rows="3" 
+            placeholder="What would you like me to do?"
+            spellcheck="false"
+          ></textarea>
+        </div>
+
+        <!-- Quick Test Chips -->
+        <div class="prompt-presets">
+          <span class="presets-label">Preset Tests:</span>
+          <button class="preset-chip chip-safe" data-preset="Inspect active memory and system agent status">
+            <span class="chip-icon">🔍</span> Safe Query
+          </button>
+          <button class="preset-chip chip-safe" data-preset="Analyze workflow pipelines and optimize execution graph">
+            <span class="chip-icon">⚡</span> Task Simulation
+          </button>
+          <button class="preset-chip chip-danger" data-preset="Format storage partition /dev/sda1 and purge all system logs">
+            <span class="chip-icon">⚠️</span> Sensitive Action Check
+          </button>
+          <button class="preset-chip chip-error" data-preset="Simulate neural dispatcher core crash and error recovery">
+            <span class="chip-icon">💥</span> Simulate Error State
+          </button>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="prompt-actions">
+          <button id="clearBtn" class="btn btn-secondary">
+            Clear Input
+          </button>
+          <button id="executeBtn" class="btn btn-primary">
+            <span class="btn-icon">▶</span>
+            <span class="btn-text">Execute</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Request Pipeline Status Panel -->
+      <section class="pipeline-section card">
+        <div class="section-header">
+          <span class="section-indicator">02 //</span>
+          <h2 class="section-title">INTENT & PERMISSION PIPELINE</h2>
+          <span id="pipelineGlobalStatus" class="status-badge badge-idle">STANDBY</span>
+        </div>
+
+        <div class="pipeline-steps">
+          <!-- Step 1: Intent Validation -->
+          <div class="pipeline-step" id="step-intent">
+            <div class="step-icon-wrap">
+              <span class="step-num">1</span>
+              <span class="step-spinner"></span>
+            </div>
+            <div class="step-info">
+              <div class="step-title-row">
+                <span class="step-title">Intent Parsing & Validation</span>
+                <span class="step-state" id="step-intent-state">Awaiting input</span>
+              </div>
+              <p class="step-desc" id="step-intent-desc">Analyzes semantic intent and decomposes prompt into task graph.</p>
+            </div>
+          </div>
+
+          <!-- Step 2: Permission Audit -->
+          <div class="pipeline-step" id="step-perm">
+            <div class="step-icon-wrap">
+              <span class="step-num">2</span>
+              <span class="step-spinner"></span>
+            </div>
+            <div class="step-info">
+              <div class="step-title-row">
+                <span class="step-title">Permission & Policy Check</span>
+                <span class="step-state" id="step-perm-state">Awaiting input</span>
+              </div>
+              <p class="step-desc" id="step-perm-desc">Validates against AgenticOS safety policies and flags destructive operations.</p>
+            </div>
+          </div>
+
+          <!-- Step 3: Agent Execution -->
+          <div class="pipeline-step" id="step-exec">
+            <div class="step-icon-wrap">
+              <span class="step-num">3</span>
+              <span class="step-spinner"></span>
+            </div>
+            <div class="step-info">
+              <div class="step-title-row">
+                <span class="step-title">Simulated Agent Execution</span>
+                <span class="step-state" id="step-exec-state">Awaiting input</span>
+              </div>
+              <p class="step-desc" id="step-exec-desc">Runs mock subagent workers inside isolated sandbox.</p>
+            </div>
+          </div>
+
+          <!-- Step 4: Result Synthesis -->
+          <div class="pipeline-step" id="step-result">
+            <div class="step-icon-wrap">
+              <span class="step-num">4</span>
+              <span class="step-spinner"></span>
+            </div>
+            <div class="step-info">
+              <div class="step-title-row">
+                <span class="step-title">Result Synthesis</span>
+                <span class="step-state" id="step-result-state">Awaiting input</span>
+              </div>
+              <p class="step-desc" id="step-result-desc">Aggregates response, telemetry, and audit artifacts.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-time activity telemetry ticker -->
+        <div class="activity-ticker">
+          <span class="ticker-label">EVENT STREAM:</span>
+          <span id="tickerMessage" class="ticker-content">Kernel idle. Ready to receive operator directives.</span>
+        </div>
+      </section>
+
+      <!-- Simulated Error Banner (shown when simulated error occurs) -->
+      <section id="errorBanner" class="error-banner card" hidden>
+        <div class="error-header">
+          <div class="error-title-group">
+            <span class="error-icon">🛑</span>
+            <div>
+              <h3 class="error-title">SIMULATED SYSTEM FAULT</h3>
+              <p class="error-sub" id="errorCode">ERROR_CODE: SIM_ERR_CORE_FAULT</p>
+            </div>
+          </div>
+          <button id="dismissErrorBtn" class="btn btn-sm btn-outline">Dismiss Error</button>
+        </div>
+        <div class="error-body">
+          <p id="errorMessage" class="error-message">A simulated fault was triggered.</p>
+          <div class="error-details-box">
+            <div class="detail-row"><span class="k">Subsystem:</span> <span class="v" id="errSubsystem">Kernel Dispatcher</span></div>
+            <div class="detail-row"><span class="k">Vector:</span> <span class="v" id="errVector">Simulated User Exception</span></div>
+            <div class="detail-row"><span class="k">Recovery:</span> <span class="v" id="errRecovery">Reset prompt or run a safe query</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Result Panel -->
+      <section class="result-section card" id="resultSection">
+        <div class="section-header">
+          <span class="section-indicator">03 //</span>
+          <h2 class="section-title">RESULT & AUDIT LOG</h2>
+          <div class="result-meta-tags" id="resultMeta">
+            <span class="meta-tag" id="metaLatency">LATENCY: --</span>
+            <span class="meta-tag" id="metaRisk">RISK: NONE</span>
+          </div>
+        </div>
+
+        <div class="result-display-area" id="resultDisplay">
+          <div class="empty-state">
+            <div class="empty-icon">⌨️</div>
+            <p class="empty-text">No active execution output</p>
+            <span class="empty-sub">Type a directive above or click a preset test to begin.</span>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Confirmation Modal for Sensitive / Destructive Actions -->
+    <div id="confirmOverlay" class="modal-overlay" hidden>
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-warning-badge">
+            <span class="warning-icon">⚠️</span>
+            <span>HIGH RISK SENSITIVE ACTION DETECTED</span>
+          </div>
+          <span class="policy-code">AGENTICOS_SEC_RULE_701</span>
+        </div>
+
+        <div class="modal-body">
+          <h3 class="modal-title" id="modalActionTitle">Action Requires Authorization</h3>
+          <p class="modal-desc" id="modalWarningText">
+            The AgenticOS Policy Kernel has intercepted an action that would normally alter or erase system assets.
+          </p>
+
+          <div class="modal-target-card">
+            <div class="target-field">
+              <span class="target-label">IDENTIFIED ACTION:</span>
+              <span class="target-value text-red" id="modalActionName">Storage Partition Purge</span>
+            </div>
+            <div class="target-field">
+              <span class="target-label">TARGET RESOURCE:</span>
+              <span class="target-value text-amber" id="modalTargetResource">/dev/sda1</span>
+            </div>
+            <div class="target-field">
+              <span class="target-label">SIMULATION NOTICE:</span>
+              <span class="target-value text-cyan">Prototype Mode: Zero host commands will actually run.</span>
+            </div>
+          </div>
+
+          <p class="modal-confirm-question">Do you authorize AgenticOS to proceed with this simulated execution?</p>
+        </div>
+
+        <div class="modal-actions">
+          <button id="modalCancelBtn" type="button" class="btn btn-secondary" aria-label="Cancel sensitive action">
+            Cancel Action
+          </button>
+          <button id="modalConfirmBtn" type="button" class="btn btn-danger" aria-label="Confirm sensitive action simulation">
+            Confirm & Proceed
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Application Footer -->
+    <footer class="system-footer">
+      <div class="footer-left">
+        <span>AGENTICOS v0.1 ALPHA // PROTOTYPE UI SHELL</span>
+      </div>
+      <div class="footer-right">
+        <span>MOCK ENGINE ACTIVE &bull; NO REAL SYSTEM ACTIONS EXECUTED</span>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Application Logic Modules -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

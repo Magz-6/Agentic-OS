@@ -1,0 +1,115 @@
+wallpaper = Image("agenticos-splash.png");
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+
+image_width = wallpaper.GetWidth();
+image_height = wallpaper.GetHeight();
+
+x = (screen_width - image_width) / 2;
+y = (screen_height - image_height) / 2;
+
+sprite = Sprite(wallpaper);
+sprite.SetPosition(x, y, 0);
+
+# Refined dynamic progress bar assets
+track_image = Image("progress-track.png");
+bar_image = Image("progress-bar.png");
+pulse_image = Image("progress-pulse.png");
+
+track_width = track_image.GetWidth();
+track_height = track_image.GetHeight();
+track_x = (screen_width - track_width) / 2;
+track_y = (screen_height / 2) + 250;
+
+track_sprite = Sprite(track_image);
+track_sprite.SetPosition(track_x, track_y, 1);
+
+bar_sprite = Sprite();
+bar_sprite.SetPosition(track_x, track_y, 2);
+
+pulse_sprite = Sprite(pulse_image);
+pulse_sprite.SetPosition(track_x, track_y, 3);
+pulse_sprite.SetOpacity(0.0);
+
+# Status text sprites
+status_init = Image("status-init.png");
+status_services = Image("status-services.png");
+status_desktop = Image("status-desktop.png");
+
+status_sprite = Sprite(status_init);
+status_x = (screen_width - status_init.GetWidth()) / 2;
+status_y = track_y + track_height + 14;
+status_sprite.SetPosition(status_x, status_y, 1);
+
+# Animation state
+progress_val = 0.05;
+pulse_pos = 0;
+frame_count = 0;
+
+fun progress_callback(duration, progress) {
+    if (progress > progress_val) {
+        progress_val = progress;
+    }
+    
+    scaled_width = Math.Int(track_width * progress_val);
+    if (scaled_width < 1) scaled_width = 1;
+    if (scaled_width > track_width) scaled_width = track_width;
+    
+    scaled_bar = bar_image.Scale(scaled_width, track_height);
+    bar_sprite.SetImage(scaled_bar);
+
+    if (progress_val > 0.65) {
+        status_sprite.SetImage(status_desktop);
+    } else if (progress_val > 0.25) {
+        status_sprite.SetImage(status_services);
+    } else {
+        status_sprite.SetImage(status_init);
+    }
+}
+Plymouth.SetBootProgressFunction(progress_callback);
+
+fun refresh_callback() {
+    frame_count++;
+    
+    if (progress_val < 0.90) {
+        progress_val = progress_val + 0.0015;
+        scaled_width = Math.Int(track_width * progress_val);
+        if (scaled_width < 1) scaled_width = 1;
+        if (scaled_width > track_width) scaled_width = track_width;
+        scaled_bar = bar_image.Scale(scaled_width, track_height);
+        bar_sprite.SetImage(scaled_bar);
+    }
+
+    pulse_width = pulse_image.GetWidth();
+    active_range = Math.Int(track_width * progress_val);
+    if (active_range > 20) {
+        pulse_pos = (pulse_pos + 4) % (active_range + pulse_width);
+        px = track_x + pulse_pos - pulse_width;
+        if (px >= track_x && px + pulse_width <= track_x + active_range) {
+            pulse_sprite.SetPosition(px, track_y, 3);
+            pulse_sprite.SetOpacity(0.85);
+        } else {
+            pulse_sprite.SetOpacity(0.0);
+        }
+    } else {
+        pulse_sprite.SetOpacity(0.0);
+    }
+}
+Plymouth.SetRefreshFunction(refresh_callback);
+
+fun status_callback(text) {
+    if (text == "starting-services") {
+        status_sprite.SetImage(status_services);
+    }
+}
+Plymouth.SetUpdateStatusFunction(status_callback);
+
+fun quit_callback() {
+    sprite.SetOpacity(0);
+    track_sprite.SetOpacity(0);
+    bar_sprite.SetOpacity(0);
+    pulse_sprite.SetOpacity(0);
+    status_sprite.SetOpacity(0);
+}
+Plymouth.SetQuitFunction(quit_callback);

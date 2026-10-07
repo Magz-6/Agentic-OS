@@ -7,8 +7,9 @@
 
 ## Documentation Index
 
-1. `magesh-linux-role.md` — Magesh scope, boundaries, and teammate interfaces.
-2. `linux-environment.md` — Verified Ubuntu 24.04 LTS development environment.
-3. `hardware-telemetry.md` — User-space hardware detection and telemetry architecture.
-4. `filesystem-safety.md` — Sandboxed workspace security model.
-5. `vm-and-installation.md` — Reproducible virtual machine setup guide.
+1. `agenticos-v0.1-alpha-release-architecture.md` — Release architecture, native desktop, boot pipeline, and ISO specifications.
+2. `magesh-linux-role.md` — Magesh scope, boundaries, and teammate interfaces.
+3. `linux-environment.md` — Verified Ubuntu 24.04 LTS development environment.
+4. `hardware-telemetry.md` — User-space hardware detection and telemetry architecture.
+5. `filesystem-safety.md` — Sandboxed workspace security model.
+6. `vm-and-installation.md` — Reproducible virtual machine setup guide.

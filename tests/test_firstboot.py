@@ -141,11 +141,11 @@ class TestFirstBootDetectionAndCreation(unittest.TestCase):
         completed = is_setup_completed(self.marker_path, self.mock_passwd)
         self.assertTrue(completed)
 
-    def test_setup_completed_by_existing_uid1000(self):
+    def test_setup_not_completed_by_existing_uid1000(self):
         with open(self.mock_passwd, "a", encoding="utf-8") as f:
             f.write("operator:x:1000:1000::/home/operator:/bin/bash\n")
         completed = is_setup_completed(self.marker_path, self.mock_passwd)
-        self.assertTrue(completed)
+        self.assertFalse(completed)
 
     def test_dry_run_user_creation(self):
         res = create_local_user(

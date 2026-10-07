@@ -66,8 +66,8 @@ class TestDesktopServiceTemplate(unittest.TestCase):
         config.read_string(TEMPLATE_PATH.read_text(encoding="utf-8"))
 
         install = config["Install"]
-        self.assertEqual(install.get("WantedBy"), "graphical.target")
-        self.assertEqual(install.get("Alias"), "display-manager.service")
+        self.assertEqual(install.get("WantedBy"), "multi-user.target")
+        self.assertNotIn("Alias", install)
 
     def test_not_installed_on_host(self):
         host_unit = Path("/etc/systemd/system/agenticos-desktop.service")

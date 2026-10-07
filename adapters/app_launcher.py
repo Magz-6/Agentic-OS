@@ -61,7 +61,7 @@ class AppLauncher:
         },
         "text_editor": {
             "description": "Default Text Editor",
-            "candidates": ["gedit", "mousepad", "nano"],
+            "candidates": ["gedit", "mousepad", "xedit", "nano"],
         },
         "file_manager": {
             "description": "Default File Manager",

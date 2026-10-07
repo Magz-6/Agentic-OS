@@ -34,6 +34,7 @@ class FilesystemAdapter(BaseAdapter):
         "get_metadata",
         "get_usage",
         "get_mounts",
+        "create_directory",
     }
 
     def __init__(self, mounts_path: str = "/proc/mounts", allowed_roots: Optional[List[str]] = None) -> None:
@@ -261,7 +262,7 @@ class FilesystemAdapter(BaseAdapter):
             return False, "Parameters must be a dictionary"
 
         # Actions requiring a target path
-        if action in ("inspect_path", "check_existence", "get_metadata", "list_directory"):
+        if action in ("inspect_path", "check_existence", "get_metadata", "list_directory", "create_directory"):
             target = self._resolve_target_path(parameters)
             if target is None:
                 return False, f"Missing required parameter 'path' or 'target_path' for action '{action}'"
@@ -269,6 +270,9 @@ class FilesystemAdapter(BaseAdapter):
                 return False, "Parameter 'path' must be a non-empty string"
             if "\0" in str(target):
                 return False, "Parameter 'path' contains illegal null byte"
+
+            if action == "create_directory" and Path(target).resolve() == Path("/"):
+                return False, "Cannot create root directory"
 
             # Check sandbox traversal if allowed_roots is enforced
             if self.allowed_roots:
@@ -356,11 +360,38 @@ class FilesystemAdapter(BaseAdapter):
                 data={"mounts": mounts, "count": len(mounts)},
             )
 
+        elif action == "create_directory":
+            target = self._resolve_target_path(parameters)
+            p = Path(target)
+            try:
+                existed = p.exists()
+                p.mkdir(parents=True, exist_ok=True)
+                return AdapterResult.success_result(
+                    adapter=self.name,
+                    action=action,
+                    message=f"Directory created: {p}" if not existed else f"Directory already exists: {p}",
+                    data={"path": str(p), "status": "created" if not existed else "already_exists", "is_dir": True},
+                )
+            except Exception as exc:
+                return AdapterResult.execution_error(
+                    adapter=self.name,
+                    action=action,
+                    message=f"Failed to create directory '{p}': {str(exc)}",
+                    details={"path": str(p), "error": str(exc)},
+                )
+
         return AdapterResult.unsupported_action(
             adapter=self.name,
             action=action,
             supported_actions=self.supported_actions,
         )
+
+    def create_directory(self, target_path: Union[str, Path]) -> Dict[str, Any]:
+        """Safely create a directory path."""
+        p = Path(target_path)
+        existed = p.exists()
+        p.mkdir(parents=True, exist_ok=True)
+        return {"path": str(p), "status": "created" if not existed else "already_exists", "is_dir": True}
 
 
 if __name__ == "__main__":

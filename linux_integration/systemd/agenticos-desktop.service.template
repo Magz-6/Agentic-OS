@@ -6,8 +6,8 @@
 [Unit]
 Description=AgenticOS Graphical Desktop Session
 Documentation=https://github.com/agenticos/agenticos
+Wants=agenticos-firstboot.service
 After=systemd-user-sessions.service agenticos-firstboot.service
-Conflicts=getty@tty7.service
 
 [Service]
 Type=simple
@@ -19,5 +19,4 @@ StandardOutput=journal
 StandardError=journal
 
 [Install]
-WantedBy=graphical.target
-Alias=display-manager.service
+WantedBy=multi-user.target

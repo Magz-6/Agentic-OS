@@ -33,6 +33,9 @@ WhatsApp Image*
 *.vmdk
 *.vhdx
 
+# Root-level .deb download artifacts (build reads from packaging/staging/lightdm-debs/)
+*.deb
+
 # Local scratch directory & temporary files
 scratch/
 *.tmp

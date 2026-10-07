@@ -12,7 +12,7 @@ Starts the AgenticOS graphical session:
 4. Waits for the X11 server socket to be ready.
 5. Configures X access for the local unprivileged user.
 6. Launches Openbox Window Manager as the unprivileged user.
-7. Launches Falkon browser pointing to http://127.0.0.1:8000 as the unprivileged user.
+7. Launches native AgenticOS GTK desktop shell as the unprivileged user.
 8. Monitors child processes and cleanly terminates on SIGTERM/SIGINT.
 """
 
@@ -228,6 +228,63 @@ def launch_session(username: str, url: str = PROMPT_UI_URL, display: str = DISPL
     )
 
     return openbox_proc, shell_proc
+
+
+def main() -> int:
+    """Start and supervise the AgenticOS native graphical desktop session."""
+    xorg_proc = None
+    openbox_proc = None
+    shell_proc = None
+
+    def cleanup(*_args):
+        for proc in (shell_proc, openbox_proc, xorg_proc):
+            if proc is not None and proc.poll() is None:
+                try:
+                    proc.terminate()
+                except Exception:
+                    pass
+
+    signal.signal(signal.SIGTERM, cleanup)
+    signal.signal(signal.SIGINT, cleanup)
+
+    try:
+        username = wait_for_user()
+
+        release_plymouth()
+
+        xorg_proc = start_x_server()
+
+        if not wait_for_x_server():
+            print("[Desktop] ERROR: X server did not become ready.", file=sys.stderr)
+            return 1
+
+        switch_vt()
+
+        openbox_proc, shell_proc = launch_session(username)
+
+        print("[Desktop] AgenticOS native graphical session started.", flush=True)
+
+        while True:
+            if xorg_proc.poll() is not None:
+                print("[Desktop] X server exited.", file=sys.stderr)
+                return 1
+
+            if openbox_proc.poll() is not None:
+                print("[Desktop] Openbox exited.", file=sys.stderr)
+                return 1
+
+            if shell_proc.poll() is not None:
+                print("[Desktop] AgenticOS shell exited.", file=sys.stderr)
+                return 1
+
+            time.sleep(1.0)
+
+    except Exception as e:
+        print(f"[Desktop] ERROR: {e}", file=sys.stderr)
+        return 1
+
+    finally:
+        cleanup()
 
 
 if __name__ == "__main__":

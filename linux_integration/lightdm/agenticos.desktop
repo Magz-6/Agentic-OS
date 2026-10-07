@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=AgenticOS
+Comment=AgenticOS Native Desktop Session
+Exec=/opt/agenticos/applications/agenticos-session/start-session.sh
+TryExec=/opt/agenticos/applications/agenticos-session/start-session.sh
+Type=Application
+DesktopNames=AgenticOS

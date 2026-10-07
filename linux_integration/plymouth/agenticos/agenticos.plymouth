@@ -1,11 +1,8 @@
 [Plymouth Theme]
 Name=AgenticOS
-Description=AgenticOS Minimal Boot Splash
-ModuleName=ubuntu-text
+Description=AgenticOS Graphical Boot Splash
+ModuleName=script
 
-[ubuntu-text]
-title=AgenticOS
-black=0x0a0e14
-white=0xffffff
-brown=0x00bcd4
-blue=0x0097a7
+[script]
+ImageDir=/usr/share/plymouth/themes/agenticos
+ScriptFile=/usr/share/plymouth/themes/agenticos/agenticos.script
